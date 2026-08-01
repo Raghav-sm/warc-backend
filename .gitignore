@@ -1,0 +1,17 @@
+.cursor
+.opencode
+.vscode
+.claude
+.codex
+
+graphify-out
+AGENTS.md
+CLAUDE.md
+
+build
+node_modules
+prisma/generated/*
+
+prisma/generated
+
+.env

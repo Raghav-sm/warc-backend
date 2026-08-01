@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "es2020",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "lib": ["es2020", "esnext.asynciterable"],
+    "outDir": "./build",
+
+    /* Strict Type-Checking Options */
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+
+    /* Additional Checks */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+
+    /* Module Resolution Options */
+    "baseUrl": "src",
+    "paths": {
+      "cron/*": ["./cron/*"],
+      "prisma-client/*": ["../prisma/generated/*"],
+      "datasources/*": ["./datasources/*"],
+      "interfaces/*": ["./interfaces/*"],
+      "schema": ["./schema/index.ts"],
+      "schema/*": ["./schema/*"],
+      "utils/*": ["./utils/*"],
+      "permissions": ["./permissions.ts"]
+    },
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Advanced Options */
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*", "prisma/**/*"],
+  "exclude": ["node_modules", "build"]
+}
