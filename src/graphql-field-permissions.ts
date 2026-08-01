@@ -21,6 +21,15 @@ export const GRAPHQL_QUERY_RULES: Record<string, ShieldRule> = {
 
   // Audit Log Queries
   getAuditLogs: withPermission(Permission.AUDIT_LOG_VIEW),
+
+  // Project Queries
+  getProject: session,
+  getProjects: session,
+  getProjectMembers: session,
+
+  // Task Queries
+  getTask: session,
+  getTasks: session,
 };
 
 export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
@@ -44,6 +53,24 @@ export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
   createRole: withPermission(Permission.ROLE_MANAGE),
   updateRole: withPermission(Permission.ROLE_MANAGE),
   deleteRole: withPermission(Permission.ROLE_MANAGE),
+
+  // Project Mutations
+  createProject: session,
+  updateProject: session,
+  deleteProject: session,
+  addProjectMember: session,
+  updateProjectMemberRole: session,
+  removeProjectMember: session,
+
+  // Task Mutations
+  createTask: session,
+  updateTask: session,
+  deleteTask: session,
+  addTaskAssignee: session,
+  removeTaskAssignee: session,
+  createSubtask: session,
+  updateSubtask: session,
+  deleteSubtask: session,
 };
 
 export const resolveGraphqlShieldQueryAccess = (field: string) => {

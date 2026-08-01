@@ -11,7 +11,7 @@ import { PUBLIC_OPERATIONS } from "./schema/auth/constants";
 
 export { or, rule } from "graphql-shield";
 
-export type ShieldRule = ReturnType<typeof rule>;
+export type ShieldRule = ReturnType<ReturnType<typeof rule>>;
 
 /** Allows fields listed in `PUBLIC_OPERATIONS` (login, signup, refresh token). */
 export const allowPublic: ShieldRule = rule({ cache: "contextual" })(async (_root, _args, _context, info) => {

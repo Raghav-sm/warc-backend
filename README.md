@@ -39,11 +39,16 @@ GraphQL endpoint: `http://localhost:8081/graphql`
 
 All users share the password `password`:
 
-| Email | Role |
-|-------|------|
-| `superadmin@example.com` | Super Admin (all permissions) |
-| `admin@example.com` | Admin (user management + role view) |
-| `viewer@example.com` | Viewer (read-only) |
+| Email | Platform role | Demo Project role |
+|-------|---------------|-------------------|
+| `superadmin@example.com` | Super Admin (all permissions) | — |
+| `admin@example.com` | Admin (user management + role view) | Manager |
+| `viewer@example.com` | Viewer (read-only) | — |
+| `sai@example.com` | Viewer | Manager |
+| `raghav@example.com` | Viewer | Dev |
+| `abhi@example.com` | Viewer | Viewer |
+
+The **Demo Project** is seeded for RBAC testing. Admin, Sai, Raghav, and Abhi are members with the project roles above.
 
 ## Permissions
 

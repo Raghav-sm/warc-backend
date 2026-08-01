@@ -59,9 +59,19 @@ export function clearSessionCache(): void {
  * permissions change, since those permissions are baked into cached sessions.
  */
 export async function invalidateRoleSessions(roleId: string): Promise<void> {
-  const holders = await prisma.user.findMany({
-    where: { roleId },
-    select: { id: true },
-  });
-  invalidateUsers((holders ?? []).map((holder) => holder.id));
+  const [platformHolders, projectMembers] = await Promise.all([
+    prisma.user.findMany({
+      where: { roleId },
+      select: { id: true },
+    }),
+    prisma.projectMember.findMany({
+      where: { roleId },
+      select: { userId: true },
+    }),
+  ]);
+
+  invalidateUsers([
+    ...(platformHolders ?? []).map((holder) => holder.id),
+    ...(projectMembers ?? []).map((member) => member.userId),
+  ]);
 }

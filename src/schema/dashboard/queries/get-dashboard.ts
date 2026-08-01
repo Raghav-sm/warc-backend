@@ -9,7 +9,8 @@ import { getDashboard } from "../services";
 
 const GetDashboard = {
   type: new GraphQLNonNull(DashboardType),
-  resolve: () => withValidation(getDashboard)({}, GetDashboardSchema),
+  resolve: (_root, _args, context) =>
+    withValidation(getDashboard)({ userId: context.userId }, GetDashboardSchema),
 };
 
 export default GetDashboard;
