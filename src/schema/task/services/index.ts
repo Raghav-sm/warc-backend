@@ -15,8 +15,9 @@ import type {
 import { Permission, TaskType, type Prisma } from "prisma-client/client";
 
 import { writeAuditLog } from "schema/audit-log/services";
+import { assertTaskNotBlockedForCompletion, getBlockedTaskIds } from "schema/task-dependency/blocking";
 
-import { getEffectivePermissions, requirePermission } from "utils/effective-permissions";
+import { assertProjectMember, getEffectivePermissions, requirePermission } from "utils/effective-permissions";
 import { ConflictException, ForbiddenException, NotFoundException, ValidationException } from "utils/errors";
 import {
   calcChecklistTaskProgress,
@@ -79,7 +80,7 @@ function mapAssignee(assignee: TaskWithRelations["assignees"][number]) {
   };
 }
 
-function mapTask(task: TaskWithRelations) {
+export function mapTask(task: TaskWithRelations, isBlocked = false) {
   return {
     id: task.id,
     title: task.title,
@@ -96,21 +97,18 @@ function mapTask(task: TaskWithRelations) {
     createdByLastName: task.createdBy.lastName,
     subtasks: task.subtasks.map(mapSubtask),
     assignees: task.assignees.map(mapAssignee),
+    isBlocked,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
   };
 }
 
-async function assertProjectMember(userId: string, projectId: string): Promise<void> {
-  const membership = await prisma.projectMember.findUnique({
-    where: { userId_projectId: { userId, projectId } },
-  });
-  if (!membership) {
-    throw new ForbiddenException("Not a project member");
-  }
+async function mapTaskWithBlocked(task: TaskWithRelations) {
+  const blockedIds = await getBlockedTaskIds([task.id]);
+  return mapTask(task, blockedIds.has(task.id));
 }
 
-async function loadTaskWithProject(taskId: string): Promise<TaskWithRelations> {
+export async function loadTaskWithProject(taskId: string): Promise<TaskWithRelations> {
   const task = await prisma.task.findFirst({
     where: { id: taskId, deletedAt: null },
     include: taskInclude,
@@ -164,7 +162,7 @@ async function validateTaskSubtaskWeights(taskId: string, options?: { replaceSub
   validateWeightSum(weights, "Subtask");
 }
 
-async function assertCanEditTask(userId: string, task: TaskWithRelations): Promise<void> {
+export async function assertCanEditTask(userId: string, task: TaskWithRelations): Promise<void> {
   const isCreator = task.createdById === userId;
   const isAssignee = task.assignees.some((assignee) => assignee.userId === userId);
 
@@ -226,8 +224,11 @@ export async function getTasks(input: GetTasksInputType) {
       limit: input.limit,
     });
 
+  const taskIds = nodes.map((task) => task.id);
+  const blockedIds = await getBlockedTaskIds(taskIds);
+
   return {
-    nodes: nodes.map(mapTask),
+    nodes: nodes.map((task) => mapTask(task, blockedIds.has(task.id))),
     pageInfo,
   };
 }
@@ -235,7 +236,8 @@ export async function getTasks(input: GetTasksInputType) {
 export async function getTask(input: GetTaskInputType) {
   const task = await loadTaskWithProject(input.id);
   await assertProjectMember(input.userId, task.projectId);
-  return mapTask(task);
+  const blockedIds = await getBlockedTaskIds([task.id]);
+  return mapTask(task, blockedIds.has(task.id));
 }
 
 export async function createTask(input: CreateTaskInputType) {
@@ -273,7 +275,7 @@ export async function createTask(input: CreateTaskInputType) {
     after: mapTask(task),
   });
 
-  return mapTask(task);
+  return mapTaskWithBlocked(task);
 }
 
 async function assertCanChangeTaskStatus(userId: string, task: TaskWithRelations): Promise<void> {
@@ -319,6 +321,10 @@ export async function updateTask(input: UpdateTaskInputType) {
     hasProvided(input.status) ? input.status : undefined,
   );
 
+  if (nextStatus === "DONE" || nextProgress >= 100) {
+    await assertTaskNotBlockedForCompletion(input.id);
+  }
+
   const task = await prisma.task.update({
     where: { id: input.id },
     data: {
@@ -334,7 +340,7 @@ export async function updateTask(input: UpdateTaskInputType) {
     include: taskInclude,
   });
 
-  const mappedAfter = mapTask(task);
+  const mappedAfter = await mapTaskWithBlocked(task);
 
   await writeAuditLog({
     actorId: input.actorId,
@@ -393,6 +399,17 @@ export async function addTaskAssignee(input: AddTaskAssigneeInputType) {
     },
   });
 
+  if (input.assigneeId !== input.userId) {
+    const { createNotification } = await import("schema/notification/services");
+    await createNotification({
+      userId: input.assigneeId,
+      type: "TASK_ASSIGNED",
+      entityType: "TASK",
+      entityId: task.id,
+      message: `You were assigned to ${task.title}`,
+    });
+  }
+
   const after = await loadTaskWithProject(input.taskId);
 
   await writeAuditLog({
@@ -404,7 +421,7 @@ export async function addTaskAssignee(input: AddTaskAssigneeInputType) {
     metadata: { assigneeId: input.assigneeId },
   });
 
-  return mapTask(after);
+  return mapTaskWithBlocked(after);
 }
 
 export async function removeTaskAssignee(input: RemoveTaskAssigneeInputType) {
@@ -434,7 +451,7 @@ export async function removeTaskAssignee(input: RemoveTaskAssigneeInputType) {
     metadata: { assigneeId: input.assigneeId },
   });
 
-  return mapTask(after);
+  return mapTaskWithBlocked(after);
 }
 
 export async function createSubtask(input: CreateSubtaskInputType) {
@@ -467,7 +484,7 @@ export async function createSubtask(input: CreateSubtaskInputType) {
     metadata: { taskId: input.taskId },
   });
 
-  return mapTask(updatedTask);
+  return mapTaskWithBlocked(updatedTask);
 }
 
 export async function updateSubtask(input: UpdateSubtaskInputType) {
@@ -508,7 +525,7 @@ export async function updateSubtask(input: UpdateSubtaskInputType) {
     metadata: { taskId: task.id },
   });
 
-  return mapTask(updatedTask);
+  return mapTaskWithBlocked(updatedTask);
 }
 
 export async function deleteSubtask(input: DeleteSubtaskInputType) {
@@ -538,13 +555,17 @@ export async function deleteSubtask(input: DeleteSubtaskInputType) {
     metadata: { taskId: task.id },
   });
 
-  return mapTask(updatedTask);
+  return mapTaskWithBlocked(updatedTask);
 }
 
 async function recalcChecklistTaskProgress(taskId: string): Promise<TaskWithRelations> {
   const task = await loadTaskWithProject(taskId);
   const progress = checklistProgressFromTask(task);
   const status = deriveTaskStatus(progress, null);
+
+  if (progress >= 100 || status === "DONE") {
+    await assertTaskNotBlockedForCompletion(taskId);
+  }
 
   return prisma.task.update({
     where: { id: taskId },

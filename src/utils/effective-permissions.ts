@@ -51,3 +51,12 @@ export async function requirePermission(
   }
   return permissions;
 }
+
+export async function assertProjectMember(userId: string, projectId: string): Promise<void> {
+  const membership = await prisma.projectMember.findUnique({
+    where: { userId_projectId: { userId, projectId } },
+  });
+  if (!membership) {
+    throw new ForbiddenException("Not a project member");
+  }
+}

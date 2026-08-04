@@ -16,8 +16,8 @@ import type { Prisma } from "prisma-client/client";
 
 import { writeAuditLog } from "schema/audit-log/services";
 
-import { getEffectivePermissions, requirePermission } from "utils/effective-permissions";
-import { ConflictException, ForbiddenException, NotFoundException, ValidationException } from "utils/errors";
+import { assertProjectMember, getEffectivePermissions, requirePermission } from "utils/effective-permissions";
+import { ConflictException, NotFoundException, ValidationException } from "utils/errors";
 import { calcProjectProgress } from "utils/progress";
 import { hasProvided } from "utils/validation";
 
@@ -33,9 +33,10 @@ type MappedProjectRow = {
   description: string | null;
   status: Prisma.ProjectGetPayload<object>["status"];
   ownerId: string;
+  owner?: { id: string; firstName: string; lastName: string; email: string } | null;
   createdAt: Date;
   updatedAt: Date;
-  _count: { members: number };
+  _count: { members: number; tasks: number };
   tasks: ProjectTaskRow[];
   members: Array<{ role: { name: string; code: string } }>;
 };
@@ -67,6 +68,9 @@ function calcProgressFromTasks(tasks: ProjectTaskRow[]): number {
 async function mapProjectForUser(project: MappedProjectRow, userId: string) {
   const membership = project.members[0];
   const myPermissions = await getEffectivePermissions(userId, project.id);
+  const ownerName = project.owner
+    ? [project.owner.firstName, project.owner.lastName].filter(Boolean).join(" ")
+    : null;
 
   return {
     id: project.id,
@@ -74,8 +78,10 @@ async function mapProjectForUser(project: MappedProjectRow, userId: string) {
     description: project.description,
     status: project.status,
     ownerId: project.ownerId,
+    ownerName,
     progressPercent: calcProgressFromTasks(project.tasks),
     memberCount: project._count.members,
+    taskCount: project._count.tasks ?? 0,
     myPermissions,
     myRoleName: membership?.role.name ?? null,
     myRoleCode: membership?.role.code ?? null,
@@ -86,7 +92,15 @@ async function mapProjectForUser(project: MappedProjectRow, userId: string) {
 
 function projectIncludeForUser(userId: string): Prisma.ProjectInclude {
   return {
-    _count: { select: { members: true } },
+    owner: {
+      select: { id: true, firstName: true, lastName: true, email: true },
+    },
+    _count: {
+      select: {
+        members: true,
+        tasks: { where: { deletedAt: null } },
+      },
+    },
     tasks: {
       where: { deletedAt: null },
       select: { weight: true, progress: true },
@@ -106,17 +120,6 @@ async function getActiveProject(projectId: string) {
     throw new NotFoundException("Project", projectId);
   }
   return project;
-}
-
-async function assertProjectMember(userId: string, projectId: string) {
-  const membership = await prisma.projectMember.findUnique({
-    where: { userId_projectId: { userId, projectId } },
-    include: { role: true },
-  });
-  if (!membership) {
-    throw new ForbiddenException("Not a project member");
-  }
-  return membership;
 }
 
 async function getProjectRoleById(roleId: string) {

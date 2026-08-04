@@ -39,16 +39,18 @@ export const ProjectMembersType = new GraphQLObjectType({
   }),
 });
 
-export const ProjectType = new GraphQLObjectType({
-  name: "ProjectType",
+export const ProjectDisplayType = new GraphQLObjectType({
+  name: "ProjectDisplayType",
   fields: () => ({
     id: { type: new GraphQLNonNull(GraphQLID) },
     name: { type: new GraphQLNonNull(GraphQLString) },
     description: { type: GraphQLString },
     status: { type: new GraphQLNonNull(ProjectStatusEnumType) },
     ownerId: { type: new GraphQLNonNull(GraphQLID) },
+    ownerName: { type: GraphQLString },
     progressPercent: { type: new GraphQLNonNull(GraphQLInt) },
     memberCount: { type: new GraphQLNonNull(GraphQLInt) },
+    taskCount: { type: new GraphQLNonNull(GraphQLInt) },
     myPermissions: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PermissionEnumType))),
     },
@@ -59,10 +61,12 @@ export const ProjectType = new GraphQLObjectType({
   }),
 });
 
+export const ProjectType = ProjectDisplayType;
+
 export const ProjectsType = new GraphQLObjectType({
   name: "ProjectsType",
   fields: () => ({
-    nodes: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ProjectType))) },
+    nodes: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ProjectDisplayType))) },
     pageInfo: { type: new GraphQLNonNull(PaginationType) },
   }),
 });

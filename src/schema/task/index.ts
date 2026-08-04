@@ -58,6 +58,7 @@ export const TaskType = new GraphQLObjectType({
     createdByLastName: { type: GraphQLString },
     subtasks: { type: new GraphQLList(new GraphQLNonNull(SubtaskType)) },
     assignees: { type: new GraphQLList(new GraphQLNonNull(TaskAssigneeType)) },
+    isBlocked: { type: new GraphQLNonNull(GraphQLBoolean) },
     createdAt: { type: new GraphQLNonNull(DateTimeScalar) },
     updatedAt: { type: new GraphQLNonNull(DateTimeScalar) },
   }),

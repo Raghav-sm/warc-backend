@@ -30,6 +30,23 @@ export const GRAPHQL_QUERY_RULES: Record<string, ShieldRule> = {
   // Task Queries
   getTask: session,
   getTasks: session,
+
+  // Comment Queries
+  getComments: session,
+
+  // Attachment Queries
+  getAttachments: session,
+
+  // Task Dependency Queries
+  getTaskDependencies: session,
+
+  // Time Log Queries
+  getTimeLogs: session,
+  getActiveTimer: session,
+
+  // Notification Queries
+  getNotifications: session,
+  getMyTasks: session,
 };
 
 export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
@@ -71,6 +88,29 @@ export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
   createSubtask: session,
   updateSubtask: session,
   deleteSubtask: session,
+
+  // Comment Mutations
+  createComment: session,
+  updateComment: session,
+  deleteComment: session,
+
+  // Attachment Mutations
+  getUploadSignature: session,
+  createAttachment: session,
+  deleteAttachment: session,
+
+  // Task Dependency Mutations
+  addTaskDependency: session,
+  removeTaskDependency: session,
+
+  // Time Log Mutations
+  startTimer: session,
+  stopTimer: session,
+  createTimeLog: session,
+
+  // Notification Mutations
+  markNotificationRead: session,
+  markAllNotificationsRead: session,
 };
 
 export const resolveGraphqlShieldQueryAccess = (field: string) => {

@@ -1,8 +1,13 @@
 import AuthMutationFields from "./auth/mutations";
+import AttachmentMutationFields from "./attachment/mutations";
+import CommentMutationFields from "./comment/mutations";
+import NotificationMutationFields from "./notification/mutations";
 import ProjectMutationFields from "./project/mutations";
 import RoleMutationFields from "./role/mutations";
 import SessionMutationFields from "./session/mutations";
+import TaskDependencyMutationFields from "./task-dependency/mutations";
 import TaskMutationFields from "./task/mutations";
+import TimeLogMutationFields from "./time-log/mutations";
 import UserMutationFields from "./user/mutations";
 
 const mutationFields = {
@@ -12,6 +17,11 @@ const mutationFields = {
   ...RoleMutationFields,
   ...ProjectMutationFields,
   ...TaskMutationFields,
+  ...CommentMutationFields,
+  ...AttachmentMutationFields,
+  ...TaskDependencyMutationFields,
+  ...TimeLogMutationFields,
+  ...NotificationMutationFields,
 };
 
 export default mutationFields;
