@@ -1,5 +1,6 @@
 import AuthMutationFields from "./auth/mutations";
 import AttachmentMutationFields from "./attachment/mutations";
+import ResourceMutationFields from "./resource/mutations";
 import CommentMutationFields from "./comment/mutations";
 import NotificationMutationFields from "./notification/mutations";
 import ProjectMutationFields from "./project/mutations";
@@ -20,6 +21,7 @@ const mutationFields = {
   ...TaskMutationFields,
   ...CommentMutationFields,
   ...AttachmentMutationFields,
+  ...ResourceMutationFields,
   ...TaskDependencyMutationFields,
   ...TimeLogMutationFields,
   ...NotificationMutationFields,

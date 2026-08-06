@@ -2,6 +2,7 @@ import AuthQueryFields from "./auth/query";
 import AuditLogQueryFields from "./audit-log/query";
 import CommentQueryFields from "./comment/query";
 import AttachmentQueryFields from "./attachment/query";
+import ResourceQueryFields from "./resource/query";
 import DashboardQueryFields from "./dashboard/queries";
 import NotificationQueryFields from "./notification/query";
 import ProjectQueryFields from "./project/query";
@@ -25,6 +26,7 @@ const queryFields = {
   ...TaskQueryFields,
   ...CommentQueryFields,
   ...AttachmentQueryFields,
+  ...ResourceQueryFields,
   ...TaskDependencyQueryFields,
   ...TimeLogQueryFields,
   ...NotificationQueryFields,

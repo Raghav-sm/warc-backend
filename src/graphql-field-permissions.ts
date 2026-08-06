@@ -37,6 +37,9 @@ export const GRAPHQL_QUERY_RULES: Record<string, ShieldRule> = {
   // Attachment Queries
   getAttachments: session,
 
+  // Resource Queries
+  getResources: session,
+
   // Task Dependency Queries
   getTaskDependencies: session,
 
@@ -105,6 +108,11 @@ export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
   getUploadSignature: session,
   createAttachment: session,
   deleteAttachment: session,
+
+  // Resource Mutations
+  createResource: session,
+  updateResource: session,
+  deleteResource: session,
 
   // Task Dependency Mutations
   addTaskDependency: session,

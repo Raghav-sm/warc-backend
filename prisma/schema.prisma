@@ -63,6 +63,16 @@ enum TaskPriority {
   URGENT @map("urgent")
 }
 
+enum ResourceType {
+  LINK @map("link")
+  FILE @map("file")
+}
+
+enum ResourceVisibility {
+  PUBLIC  @map("public")
+  PRIVATE @map("private")
+}
+
 // ---------------------------------------------------------------------------
 // Auth & platform
 // ---------------------------------------------------------------------------
@@ -106,6 +116,8 @@ model User {
   taskAssignees  TaskAssignee[]
   comments       Comment[]
   uploadedFiles  Attachment[]    @relation("AttachmentUploader")
+  createdResources Resource[]    @relation("ResourceCreator")
+  resourceAccess   ResourceAccess[]
   timeLogs       TimeLog[]
   notifications  Notification[]
 
@@ -173,8 +185,9 @@ model Project {
   ownerId String @map("owner_id") @db.Uuid
   owner   User   @relation("ProjectOwner", fields: [ownerId], references: [id])
 
-  members ProjectMember[]
-  tasks   Task[]
+  members   ProjectMember[]
+  tasks     Task[]
+  resources Resource[]
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -361,6 +374,48 @@ model TimeLog {
   @@index([taskId])
   @@index([userId])
   @@map("time_logs")
+}
+
+model Resource {
+  id String @id @default(uuid()) @map("resource_id") @db.Uuid
+
+  projectId String  @map("project_id") @db.Uuid
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  type       ResourceType
+  title      String
+  url        String?
+  fileUrl    String? @map("file_url")
+  fileName   String? @map("file_name")
+  fileType   String? @map("file_type")
+  size       Int?
+  visibility ResourceVisibility @default(PUBLIC)
+
+  createdById String @map("created_by_id") @db.Uuid
+  createdBy   User   @relation("ResourceCreator", fields: [createdById], references: [id])
+
+  access ResourceAccess[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([projectId])
+  @@map("resources")
+}
+
+model ResourceAccess {
+  id String @id @default(uuid()) @map("resource_access_id") @db.Uuid
+
+  resourceId String   @map("resource_id") @db.Uuid
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, userId])
+  @@index([userId])
+  @@map("resource_access")
 }
 
 model Notification {
