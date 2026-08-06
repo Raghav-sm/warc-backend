@@ -19,6 +19,7 @@ import { assertTaskNotBlockedForCompletion, getBlockedTaskIds } from "schema/tas
 
 import { assertProjectMember, getEffectivePermissions, requirePermission } from "utils/effective-permissions";
 import { ConflictException, ForbiddenException, NotFoundException, ValidationException } from "utils/errors";
+import { publishTaskUpdated } from "utils/pubsub";
 import {
   calcChecklistTaskProgress,
   deriveTaskStatus,
@@ -349,6 +350,14 @@ export async function updateTask(input: UpdateTaskInputType) {
     entityId: task.id,
     before: mapTask(before),
     after: mappedAfter,
+  });
+
+  await publishTaskUpdated(before.projectId, {
+    id: mappedAfter.id,
+    projectId: before.projectId,
+    status: mappedAfter.status,
+    progress: mappedAfter.progress,
+    title: mappedAfter.title,
   });
 
   return mappedAfter;

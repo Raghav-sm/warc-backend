@@ -2718,6 +2718,16 @@ graphql-shield@^7.6.5:
     tslib "^2.4.0"
     yup "^0.32.0"
 
+graphql-sse@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/graphql-sse/-/graphql-sse-2.6.0.tgz#d3af7ac13ebb19fb7042808f535dc45c700bc64c"
+  integrity sha512-BXT5Rjv9UFunjQsmN9WWEIq+TFNhgYibgwo1xkXLxzguQVyOd6paJ4v5DlL9K5QplS0w74bhF+aUiqaGXZBaug==
+
+graphql-subscriptions@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/graphql-subscriptions/-/graphql-subscriptions-3.0.0.tgz#820c846ef271414c08f64827b5c9a192801e1b6f"
+  integrity sha512-kZCdevgmzDjGAOqH7GlDmQXYAkuHoKpMlJrqF40HMPhUhM5ZWSFSxCwD/nSi6AkaijmMfsFhoJRGJ27UseCvRA==
+
 graphql-type-json@^0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/graphql-type-json/-/graphql-type-json-0.3.2.tgz#f53a851dbfe07bd1c8157d24150064baab41e115"

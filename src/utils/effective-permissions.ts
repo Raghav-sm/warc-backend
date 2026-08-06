@@ -52,6 +52,21 @@ export async function requirePermission(
   return permissions;
 }
 
+const PLATFORM_ADMIN_CODES = new Set(["SUPER_ADMIN", "ADMIN"]);
+
+export async function assertPlatformAdmin(userId: string): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: { select: { code: true } } },
+  });
+  if (!user) {
+    throw new NotFoundException("User", userId);
+  }
+  if (!PLATFORM_ADMIN_CODES.has(user.role.code)) {
+    throw new ForbiddenException("Permanent deletion is restricted to administrators. Contact an admin.");
+  }
+}
+
 export async function assertProjectMember(userId: string, projectId: string): Promise<void> {
   const membership = await prisma.projectMember.findUnique({
     where: { userId_projectId: { userId, projectId } },

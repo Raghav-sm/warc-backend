@@ -5,6 +5,7 @@ import GraphQLJSON from "graphql-type-json";
 
 import mutationFields from "./mutations";
 import queryFields from "./query";
+import SubscriptionType from "./subscriptions";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ const MutationType = new GraphQLObjectType({
 const schema = new GraphQLSchema({
   query: QueryType,
   mutation: MutationType,
+  subscription: SubscriptionType,
   types: [GraphQLJSON, DateScalar, TimeScalar, DateTimeScalar],
 });
 

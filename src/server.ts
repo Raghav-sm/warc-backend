@@ -18,6 +18,8 @@ import { authenticateSession } from "schema/auth/services";
 import { cirkleLogger, logger } from "utils/logger";
 import { generateReferenceId, resolveClientIp } from "utils/misc";
 
+import { mountGraphqlSse } from "./graphql-sse-handler";
+
 dotenv.config();
 const { PORT, NODE_ENV, API_BASE_URL } = process.env;
 
@@ -82,6 +84,8 @@ const startServer = async () => {
       },
     }),
   );
+
+  mountGraphqlSse(app);
 };
 
 const start = async (): Promise<void> => {

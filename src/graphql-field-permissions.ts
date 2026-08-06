@@ -47,6 +47,13 @@ export const GRAPHQL_QUERY_RULES: Record<string, ShieldRule> = {
   // Notification Queries
   getNotifications: session,
   getMyTasks: session,
+
+  // Trash Queries
+  getTrashedProjects: session,
+  getTrashedTasks: session,
+
+  // Search Queries
+  globalSearch: session,
 };
 
 export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
@@ -111,6 +118,12 @@ export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
   // Notification Mutations
   markNotificationRead: session,
   markAllNotificationsRead: session,
+
+  // Trash Mutations
+  restoreProject: session,
+  restoreTask: session,
+  permanentDeleteProject: session,
+  permanentDeleteTask: session,
 };
 
 export const resolveGraphqlShieldQueryAccess = (field: string) => {

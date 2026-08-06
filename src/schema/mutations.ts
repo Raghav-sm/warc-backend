@@ -8,6 +8,7 @@ import SessionMutationFields from "./session/mutations";
 import TaskDependencyMutationFields from "./task-dependency/mutations";
 import TaskMutationFields from "./task/mutations";
 import TimeLogMutationFields from "./time-log/mutations";
+import TrashMutationFields from "./trash/mutations";
 import UserMutationFields from "./user/mutations";
 
 const mutationFields = {
@@ -22,6 +23,7 @@ const mutationFields = {
   ...TaskDependencyMutationFields,
   ...TimeLogMutationFields,
   ...NotificationMutationFields,
+  ...TrashMutationFields,
 };
 
 export default mutationFields;

@@ -12,6 +12,7 @@ import { createNotification } from "schema/notification/services";
 
 import { assertProjectMember, getEffectivePermissions } from "utils/effective-permissions";
 import { ForbiddenException, NotFoundException } from "utils/errors";
+import { publishCommentAdded } from "utils/pubsub";
 
 const prisma = getPrismaInstance();
 
@@ -188,7 +189,10 @@ export async function createComment(input: CreateCommentInputType) {
     body: input.body,
   });
 
-  return mapComment(comment);
+  const mapped = mapComment(comment);
+  await publishCommentAdded(task.id, mapped);
+
+  return mapped;
 }
 
 export async function updateComment(input: UpdateCommentInputType) {

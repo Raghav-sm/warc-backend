@@ -14,6 +14,7 @@ import { getBlockedTaskIds } from "schema/task-dependency/blocking";
 
 import { hasProvided } from "utils/validation";
 import { NotFoundException } from "utils/errors";
+import { publishNotificationCreated } from "utils/pubsub";
 
 const prisma = getPrismaInstance();
 
@@ -81,7 +82,10 @@ export async function createNotification(input: CreateNotificationInputType) {
     },
   });
 
-  return mapNotification(notification);
+  const mapped = mapNotification(notification);
+  await publishNotificationCreated(input.userId, mapped);
+
+  return mapped;
 }
 
 export async function getNotifications(input: GetNotificationsInputType) {

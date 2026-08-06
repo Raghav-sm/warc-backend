@@ -7,9 +7,11 @@ import NotificationQueryFields from "./notification/query";
 import ProjectQueryFields from "./project/query";
 import RoleQueryFields from "./role/query";
 import SessionQueryFields from "./session/queries";
+import SearchQueryFields from "./search/query";
 import TaskDependencyQueryFields from "./task-dependency/query";
 import TaskQueryFields from "./task/query";
 import TimeLogQueryFields from "./time-log/query";
+import TrashQueryFields from "./trash/query";
 import UserQueryFields from "./user/query";
 
 const queryFields = {
@@ -26,6 +28,8 @@ const queryFields = {
   ...TaskDependencyQueryFields,
   ...TimeLogQueryFields,
   ...NotificationQueryFields,
+  ...TrashQueryFields,
+  ...SearchQueryFields,
 };
 
 export default queryFields;
