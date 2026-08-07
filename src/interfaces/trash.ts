@@ -51,3 +51,35 @@ export const PermanentDeleteTaskSchema = z.object({
 });
 
 export type PermanentDeleteTaskInputType = z.infer<typeof PermanentDeleteTaskSchema>;
+
+export const GetTrashedNotesSchema = z.object({
+  userId: z.uuid(MESSAGE_MAP.INVALID("userId", "UUID")).trim(),
+  page: PageSchema,
+  limit: LimitSchema,
+});
+
+export type GetTrashedNotesInputType = z.infer<typeof GetTrashedNotesSchema>;
+
+export const GetTrashedFoldersSchema = z.object({
+  userId: z.uuid(MESSAGE_MAP.INVALID("userId", "UUID")).trim(),
+  page: PageSchema,
+  limit: LimitSchema,
+});
+
+export type GetTrashedFoldersInputType = z.infer<typeof GetTrashedFoldersSchema>;
+
+export const RestoreNoteSchema = z.object({
+  id: z.uuid(MESSAGE_MAP.INVALID("id", "UUID")).trim(),
+  userId: z.uuid(MESSAGE_MAP.INVALID("userId", "UUID")).trim(),
+  actorId: z.uuid(MESSAGE_MAP.INVALID("actorId", "UUID")).trim(),
+});
+
+export type RestoreNoteInputType = z.infer<typeof RestoreNoteSchema>;
+
+export const RestoreFolderSchema = z.object({
+  id: z.uuid(MESSAGE_MAP.INVALID("id", "UUID")).trim(),
+  userId: z.uuid(MESSAGE_MAP.INVALID("userId", "UUID")).trim(),
+  actorId: z.uuid(MESSAGE_MAP.INVALID("actorId", "UUID")).trim(),
+});
+
+export type RestoreFolderInputType = z.infer<typeof RestoreFolderSchema>;

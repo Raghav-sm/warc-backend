@@ -1,15 +1,20 @@
 import { getPrismaInstance } from "datasources/prisma";
 import type {
+  GetTrashedFoldersInputType,
+  GetTrashedNotesInputType,
   GetTrashedProjectsInputType,
   GetTrashedTasksInputType,
   PermanentDeleteProjectInputType,
   PermanentDeleteTaskInputType,
+  RestoreFolderInputType,
+  RestoreNoteInputType,
   RestoreProjectInputType,
   RestoreTaskInputType,
 } from "interfaces/trash";
 import { Permission, type Prisma } from "prisma-client/client";
 
 import { writeAuditLog } from "schema/audit-log/services";
+import { getNote } from "schema/note/services";
 import { getProject } from "schema/project/services";
 import { assertCanEditTask, getTask, mapTask } from "schema/task/services";
 
@@ -59,6 +64,24 @@ function mapTrashedTask(task: Prisma.TaskGetPayload<{ include: { project: { sele
   };
 }
 
+function mapTrashedNote(note: Prisma.NoteGetPayload<Record<string, never>>) {
+  return {
+    id: note.id,
+    title: note.title,
+    folderId: note.folderId,
+    deletedAt: note.deletedAt,
+  };
+}
+
+function mapTrashedFolder(folder: Prisma.FolderGetPayload<Record<string, never>>) {
+  return {
+    id: folder.id,
+    name: folder.name,
+    parentId: folder.parentId,
+    deletedAt: folder.deletedAt,
+  };
+}
+
 function projectAuditSnapshot(project: {
   id: string;
   name: string;
@@ -94,6 +117,46 @@ export async function getTrashedProjects(input: GetTrashedProjectsInputType) {
 
   return {
     nodes: nodes.map(mapTrashedProject),
+    pageInfo,
+  };
+}
+
+export async function getTrashedNotes(input: GetTrashedNotesInputType) {
+  const [nodes, pageInfo] = await prisma.note
+    .paginate({
+      where: {
+        ownerId: input.userId,
+        deletedAt: { not: null },
+      },
+      orderBy: { deletedAt: "desc" },
+    })
+    .withPages({
+      page: input.page,
+      limit: input.limit,
+    });
+
+  return {
+    nodes: nodes.map(mapTrashedNote),
+    pageInfo,
+  };
+}
+
+export async function getTrashedFolders(input: GetTrashedFoldersInputType) {
+  const [nodes, pageInfo] = await prisma.folder
+    .paginate({
+      where: {
+        ownerId: input.userId,
+        deletedAt: { not: null },
+      },
+      orderBy: { deletedAt: "desc" },
+    })
+    .withPages({
+      page: input.page,
+      limit: input.limit,
+    });
+
+  return {
+    nodes: nodes.map(mapTrashedFolder),
     pageInfo,
   };
 }
@@ -154,6 +217,94 @@ export async function restoreProject(input: RestoreProjectInputType) {
   });
 
   return getProject({ id: project.id, userId: input.userId });
+}
+
+export async function restoreNote(input: RestoreNoteInputType) {
+  const note = await prisma.note.findFirst({
+    where: { id: input.id, ownerId: input.userId, deletedAt: { not: null } },
+  });
+
+  if (!note) {
+    throw new NotFoundException("Note", input.id);
+  }
+
+  if (note.folderId != null) {
+    const folder = await prisma.folder.findFirst({
+      where: { id: note.folderId, ownerId: input.userId, deletedAt: null },
+    });
+
+    if (!folder) {
+      throw new NotFoundException("Folder", note.folderId);
+    }
+  }
+
+  await prisma.note.update({
+    where: { id: input.id },
+    data: { deletedAt: null },
+  });
+
+  await writeAuditLog({
+    actorId: input.actorId,
+    action: "RESTORE",
+    entityType: "NOTE",
+    entityId: note.id,
+    after: {
+      id: note.id,
+      title: note.title,
+      folderId: note.folderId,
+    },
+  });
+
+  return getNote({ id: note.id, userId: input.userId });
+}
+
+export async function restoreFolder(input: RestoreFolderInputType) {
+  const folder = await prisma.folder.findFirst({
+    where: { id: input.id, ownerId: input.userId, deletedAt: { not: null } },
+  });
+
+  if (!folder) {
+    throw new NotFoundException("Folder", input.id);
+  }
+
+  if (folder.parentId != null) {
+    const parent = await prisma.folder.findFirst({
+      where: { id: folder.parentId, ownerId: input.userId, deletedAt: null },
+    });
+
+    if (!parent) {
+      throw new NotFoundException("Folder", folder.parentId);
+    }
+  }
+
+  await prisma.folder.update({
+    where: { id: input.id },
+    data: { deletedAt: null },
+  });
+
+  await writeAuditLog({
+    actorId: input.actorId,
+    action: "RESTORE",
+    entityType: "FOLDER",
+    entityId: folder.id,
+    after: {
+      id: folder.id,
+      name: folder.name,
+      parentId: folder.parentId,
+    },
+  });
+
+  const noteCount = await prisma.note.count({
+    where: { folderId: folder.id, ownerId: input.userId, deletedAt: null },
+  });
+
+  return {
+    id: folder.id,
+    name: folder.name,
+    parentId: folder.parentId,
+    noteCount,
+    children: [],
+  };
 }
 
 export async function restoreTask(input: RestoreTaskInputType) {

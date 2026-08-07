@@ -4,6 +4,7 @@ import CommentQueryFields from "./comment/query";
 import AttachmentQueryFields from "./attachment/query";
 import ResourceQueryFields from "./resource/query";
 import DashboardQueryFields from "./dashboard/queries";
+import NoteQueryFields from "./note/query";
 import NotificationQueryFields from "./notification/query";
 import ProjectQueryFields from "./project/query";
 import RoleQueryFields from "./role/query";
@@ -29,6 +30,7 @@ const queryFields = {
   ...ResourceQueryFields,
   ...TaskDependencyQueryFields,
   ...TimeLogQueryFields,
+  ...NoteQueryFields,
   ...NotificationQueryFields,
   ...TrashQueryFields,
   ...SearchQueryFields,

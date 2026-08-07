@@ -120,6 +120,8 @@ model User {
   resourceAccess   ResourceAccess[]
   timeLogs       TimeLog[]
   notifications  Notification[]
+  folders        Folder[]
+  notes          Note[]
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -434,4 +436,52 @@ model Notification {
 
   @@index([userId, isRead, createdAt])
   @@map("notifications")
+}
+
+// ---------------------------------------------------------------------------
+// Notes (personal workspace)
+// ---------------------------------------------------------------------------
+
+model Folder {
+  id String @id @default(uuid()) @map("folder_id") @db.Uuid
+
+  name  String
+
+  parentId String? @map("parent_id") @db.Uuid
+  parent   Folder?  @relation("FolderChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children Folder[] @relation("FolderChildren")
+
+  ownerId String @map("owner_id") @db.Uuid
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  notes Note[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([ownerId])
+  @@index([parentId])
+  @@map("folders")
+}
+
+model Note {
+  id String @id @default(uuid()) @map("note_id") @db.Uuid
+
+  title   String
+  content String @default("")
+
+  folderId String? @map("folder_id") @db.Uuid
+  folder   Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  ownerId String @map("owner_id") @db.Uuid
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([ownerId])
+  @@index([folderId])
+  @@map("notes")
 }

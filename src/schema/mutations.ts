@@ -2,6 +2,7 @@ import AuthMutationFields from "./auth/mutations";
 import AttachmentMutationFields from "./attachment/mutations";
 import ResourceMutationFields from "./resource/mutations";
 import CommentMutationFields from "./comment/mutations";
+import NoteMutationFields from "./note/mutations";
 import NotificationMutationFields from "./notification/mutations";
 import ProjectMutationFields from "./project/mutations";
 import RoleMutationFields from "./role/mutations";
@@ -24,6 +25,7 @@ const mutationFields = {
   ...ResourceMutationFields,
   ...TaskDependencyMutationFields,
   ...TimeLogMutationFields,
+  ...NoteMutationFields,
   ...NotificationMutationFields,
   ...TrashMutationFields,
 };

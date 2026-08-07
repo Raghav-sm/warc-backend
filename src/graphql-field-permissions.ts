@@ -40,6 +40,11 @@ export const GRAPHQL_QUERY_RULES: Record<string, ShieldRule> = {
   // Resource Queries
   getResources: session,
 
+  // Note Queries
+  getFolders: session,
+  getNotes: session,
+  getNote: session,
+
   // Task Dependency Queries
   getTaskDependencies: session,
 
@@ -54,6 +59,8 @@ export const GRAPHQL_QUERY_RULES: Record<string, ShieldRule> = {
   // Trash Queries
   getTrashedProjects: session,
   getTrashedTasks: session,
+  getTrashedNotes: session,
+  getTrashedFolders: session,
 
   // Search Queries
   globalSearch: session,
@@ -114,6 +121,14 @@ export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
   updateResource: session,
   deleteResource: session,
 
+  // Note Mutations
+  createFolder: session,
+  updateFolder: session,
+  deleteFolder: session,
+  createNote: session,
+  updateNote: session,
+  deleteNote: session,
+
   // Task Dependency Mutations
   addTaskDependency: session,
   removeTaskDependency: session,
@@ -130,6 +145,8 @@ export const GRAPHQL_MUTATION_RULES: Record<string, ShieldRule> = {
   // Trash Mutations
   restoreProject: session,
   restoreTask: session,
+  restoreNote: session,
+  restoreFolder: session,
   permanentDeleteProject: session,
   permanentDeleteTask: session,
 };

@@ -54,3 +54,39 @@ export const TrashedTasksType = new GraphQLObjectType({
     pageInfo: { type: new GraphQLNonNull(PaginationType) },
   }),
 });
+
+export const TrashedNoteType = new GraphQLObjectType({
+  name: "TrashedNoteType",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    title: { type: new GraphQLNonNull(GraphQLString) },
+    folderId: { type: GraphQLID },
+    deletedAt: { type: new GraphQLNonNull(DateTimeScalar) },
+  }),
+});
+
+export const TrashedNotesType = new GraphQLObjectType({
+  name: "TrashedNotesType",
+  fields: () => ({
+    nodes: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(TrashedNoteType))) },
+    pageInfo: { type: new GraphQLNonNull(PaginationType) },
+  }),
+});
+
+export const TrashedFolderType = new GraphQLObjectType({
+  name: "TrashedFolderType",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    parentId: { type: GraphQLID },
+    deletedAt: { type: new GraphQLNonNull(DateTimeScalar) },
+  }),
+});
+
+export const TrashedFoldersType = new GraphQLObjectType({
+  name: "TrashedFoldersType",
+  fields: () => ({
+    nodes: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(TrashedFolderType))) },
+    pageInfo: { type: new GraphQLNonNull(PaginationType) },
+  }),
+});
